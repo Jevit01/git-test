@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#000000" />
+  <title>Deli Screen</title>
+  <style>
+    :root {
+      --bg: #050505;
+      --text: #ffffff;
+      --muted: rgba(255,255,255,.72);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      font-family: Arial, Helvetica, sans-serif;
+      cursor: none;
+    }
+
+    .screen {
+      position: fixed;
+      inset: 0;
+      background: #000;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #000;
+      opacity: 0;
+      transition: opacity 1.4s ease-in-out;
+    }
+
+    .slide.active { opacity: 1; }
+
+    .message {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 5vw;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 20% 20%, rgba(255,255,255,.09), transparent 30%),
+        radial-gradient(circle at 80% 80%, rgba(255,255,255,.08), transparent 30%),
+        #070707;
+    }
+
+    .message h1 {
+      margin: 0 0 1rem;
+      font-size: clamp(2.5rem, 7vw, 6rem);
+      letter-spacing: -.04em;
+    }
+
+    .message p {
+      margin: 0;
+      max-width: 900px;
+      color: var(--muted);
+      font-size: clamp(1.1rem, 2.4vw, 2rem);
+      line-height: 1.35;
+    }
+
+    .clock {
+      position: fixed;
+      right: 2.2vw;
+      bottom: 2vw;
+      z-index: 10;
+      color: rgba(255,255,255,.68);
+      font-size: clamp(.9rem, 1.4vw, 1.35rem);
+      letter-spacing: .04em;
+      text-shadow: 0 2px 12px rgba(0,0,0,.65);
+      display: none;
+    }
+
+    body.show-clock .clock { display: block; }
+  </style>
+</head>
+<body>
+  <main class="screen" id="screen"></main>
+
+  <section class="message" id="emptyMessage">
+    <div>
+      <h1>Deli Screen</h1>
+      <p>Add your promo images inside the <strong>images</strong> folder on GitHub, then put those file names inside the slides list in this page.</p>
+    </div>
+  </section>
+
+  <div class="clock" id="clock"></div>
+
+  <script>
+    // ADD YOUR IMAGES HERE.
+    // Example after uploading files to the /images folder:
+    // const slides = ["images/promo-1.jpg", "images/promo-2.jpg", "images/promo-3.png"];
+    const slides = [
+      // "images/promo-1.jpg",
+      // "images/promo-2.jpg"
+    ];
+
+    const secondsPerSlide = 12;
+    const showClock = false;
+    const refreshPageEveryMinutes = 30;
+
+    const screen = document.getElementById("screen");
+    const emptyMessage = document.getElementById("emptyMessage");
+    const clock = document.getElementById("clock");
+
+    if (showClock) document.body.classList.add("show-clock");
+
+    function updateClock() {
+      clock.textContent = new Date().toLocaleTimeString([], {
+        hour: "numeric",
+        minute: "2-digit"
+      });
+    }
+
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    if (slides.length > 0) {
+      emptyMessage.style.display = "none";
+
+      slides.forEach((src, index) => {
+        const img = document.createElement("img");
+        img.className = "slide" + (index === 0 ? " active" : "");
+        img.src = src + "?v=" + Date.now();
+        img.alt = "Store promotion " + (index + 1);
+        screen.appendChild(img);
+      });
+
+      let current = 0;
+      const slideEls = Array.from(document.querySelectorAll(".slide"));
+
+      setInterval(() => {
+        slideEls[current].classList.remove("active");
+        current = (current + 1) % slideEls.length;
+        slideEls[current].classList.add("active");
+      }, secondsPerSlide * 1000);
+    }
+
+    if (refreshPageEveryMinutes > 0) {
+      setTimeout(() => window.location.reload(), refreshPageEveryMinutes * 60 * 1000);
+    }
+  </script>
+</body>
+</html>
